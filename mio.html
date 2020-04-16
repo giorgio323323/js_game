@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>EaselJS demo: Ticker.setPaused()</title>
+	<link href="_shared/demo.css" rel="stylesheet" type="text/css">
+	<script src="http://code.createjs.com/easeljs-0.8.1.min.js"></script>
+	<script>
+		
+		var stage, pauseCircle, goCircle, output;
+		var KEYCODE_LEFT= 90, //z
+		KEYCODE_RIGHT 	= 88, // x
+		KEYCODE_UP 		= 38, 
+		KEYCODE_DOWN 	= 40;
+	
+		function init() {
+			stage = new createjs.Stage("demoCanvas");
+			
+			pauseCircle = new createjs.Shape();
+			pauseCircle.graphics.beginFill("red").drawCircle(0, 0, 20);
+			pauseCircle.teta = 0;
+			pauseCircle.vel  = 0;
+			stage.addChild(pauseCircle);
+			
+			line = new createjs.Shape();
+			stage.addChild(line);
+			line.graphics.setStrokeStyle(1).beginStroke("rgba(0,0,0,1)");
+			
+			// Tell EaselJS where to go to start drawing the line
+            line.graphics.moveTo(pauseCircle.x, pauseCircle.y);
+
+
+
+
+            // Stop drawing this line
+            //line.graphics.endStroke();
+			
+			
+			
+			// goCircle = new createjs.Shape();
+			// goCircle.graphics.beginFill("green").drawCircle(0, 0, 20);
+			// goCircle.y = 150;
+			// stage.addChild(goCircle);
+
+			// and register our main listener
+			createjs.Ticker.on("tick", tick);
+
+			// UI code:
+			output = stage.addChild(new createjs.Text("", "14px monospace", "#000"));
+			output.lineHeight = 15;
+			output.textBaseline = "top";
+			output.x = 10;
+			output.y = stage.canvas.height-output.lineHeight*3-10;
+			
+			this.document.onkeydown = keyPressed;		
+			
+			pauseCircle.stepx = pauseCircle.stepy = 0;
+		}
+		
+
+	
+		function keyPressed(event) {
+			switch(event.keyCode) {
+				case KEYCODE_LEFT:	
+					pauseCircle.teta -= 5;
+					break;
+				case KEYCODE_RIGHT: 
+					pauseCircle.teta += 5; 
+					break;
+				case KEYCODE_UP: 
+					pauseCircle.vel -= 5;
+					break;
+				case KEYCODE_DOWN: 
+					pauseCircle.vel += 5;
+					break;
+			}
+
+		}
+		
+		
+		function tick(event) {
+			//goCircle.x += 10;
+			// if (goCircle.x > stage.canvas.width) { goCircle.x = 0; }
+
+            if (!createjs.Ticker.getPaused()) {
+                pauseCircle.x += pauseCircle.vel*Math.cos(pauseCircle.teta*3.14/180.0);
+                pauseCircle.y += pauseCircle.vel*Math.sin(pauseCircle.teta*3.14/180.0);
+                if (pauseCircle.x > stage.canvas.width) 	{ pauseCircle.x = 0; }
+                if (pauseCircle.x < 0) 						{ pauseCircle.x = stage.canvas.width; }
+                if (pauseCircle.y > stage.canvas.height) 	{ pauseCircle.y = 0; }
+                if (pauseCircle.y < 0) 						{ pauseCircle.y = stage.canvas.height; }
+				
+				// Tell EaselJS where to draw the line to
+				line.graphics.lineTo(pauseCircle.x, pauseCircle.y);
+            }
+			
+			// output.text = "getPaused()    = "+createjs.Ticker.getPaused()+"\n"+
+				// "getTime(true)  = "+createjs.Ticker.getTime(true)+"\n"+
+				// "getTime(false) = "+createjs.Ticker.getTime(false);			output.text = "getPaused()    = "+createjs.Ticker.getPaused()+"\n"+
+			output.text = "teta    = "+pauseCircle.teta+"\n"+
+				"vel  = "+pauseCircle.vel+"\n"+
+				"x, y = "+pauseCircle.x +"," + pauseCircle.y;
+			
+			stage.update(event); // important!!
+		}
+		
+		function togglePause() {
+			var paused = !createjs.Ticker.getPaused();
+			createjs.Ticker.setPaused(paused);
+			document.getElementById("pauseBtn").value = paused ? "unpausedd" : "pause";
+		}
+	</script>
+</head>
+<body onload="init();">
+	<input type="button" value="pause" id="pauseBtn" onclick="togglePause();"><br>
+	<canvas id="demoCanvas" width="1400" height="800">
+		alternate content
+	</canvas>
+</body>
+</html>
