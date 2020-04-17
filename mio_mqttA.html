@@ -9,7 +9,10 @@
 	<script>
 		// http://www.hivemq.com/demos/websocket-client/
 		
-		var stage, pauseCircle, goCircle, output;
+		-aggiunta palla B
+		
+		
+		var stage, pauseCircle, BCircle, output;
 		var KEYCODE_LEFT= 90, //z
 		KEYCODE_RIGHT 	= 88, // x
 		KEYCODE_UP 		= 38, 
@@ -18,18 +21,29 @@
 		function init() {
 			stage = new createjs.Stage("demoCanvas");
 			
+			// cerchio e linea A
 			pauseCircle = new createjs.Shape();
 			pauseCircle.graphics.beginFill("red").drawCircle(0, 0, 20);
-			pauseCircle.teta = 0;
-			pauseCircle.vel  = 0;
+			pauseCircle.teta = 0;		// aggiungo nuove proprietà
+			pauseCircle.vel  = 0;		// aggiungo nuove proprietà
 			stage.addChild(pauseCircle);
 			
 			line = new createjs.Shape();
 			stage.addChild(line);
 			line.graphics.setStrokeStyle(1).beginStroke("rgba(0,0,0,1)");
 			
+			// cerchio e linea B
+			BCircle = new createjs.Shape();
+			BCircle.graphics.beginFill("green").drawCircle(0, 0, 20);
+			BCircle.teta = 0;
+			BCircle.vel  = 0;
+			stage.addChild(BCircle);
+			
+			Bline = new createjs.Shape();
+			stage.addChild(Bline);
+			Bline.graphics.setStrokeStyle(1).beginStroke("green");
 			// Tell EaselJS where to go to start drawing the line
-            line.graphics.moveTo(pauseCircle.x, pauseCircle.y);
+            Bline.graphics.moveTo(BCircle.x, BCircle.y);
 
 
 
@@ -39,10 +53,6 @@
 			
 			
 			
-			// goCircle = new createjs.Shape();
-			// goCircle.graphics.beginFill("green").drawCircle(0, 0, 20);
-			// goCircle.y = 150;
-			// stage.addChild(goCircle);
 
 			// and register our main listener
 			createjs.Ticker.on("tick", tick);
@@ -110,15 +120,15 @@
 			
 			var messaggio = message.payloadString;
 			data = messaggio.split(';');
-			pauseCircle.teta 	= parseInt(data[0]);
-			pauseCircle.vel 	= parseInt(data[1]);
-			pauseCircle.x 		= parseInt(data[2]);
-			pauseCircle.y 		= parseInt(data[3]);
+			BCircle.teta 	= parseInt(data[0]);
+			BCircle.vel 	= parseInt(data[1]);
+			BCircle.x 		= parseInt(data[2]);
+			BCircle.y 		= parseInt(data[3]);
 			console.log(data);
 		}
 
 
-	
+		// keyboard handler
 		function keyPressed(event) {
 			switch(event.keyCode) {
 				case KEYCODE_LEFT:	
@@ -144,7 +154,8 @@
 			client.send(message); 
 		}
 		
-		
+		// questa parte crea il movimento
+		// viene richiamata a tempo
 		function tick(event) {
 			//goCircle.x += 10;
 			// if (goCircle.x > stage.canvas.width) { goCircle.x = 0; }
@@ -159,6 +170,16 @@
 				
 				// Tell EaselJS where to draw the line to
 				line.graphics.lineTo(pauseCircle.x, pauseCircle.y);
+
+                BCircle.x	+= BCircle.vel*Math.cos(BCircle.teta*3.14/180.0);
+                BCircle.y 	+= BCircle.vel*Math.sin(BCircle.teta*3.14/180.0);
+                if (BCircle.x > stage.canvas.width) 	{ BCircle.x = 0; }
+                if (BCircle.x < 0) 						{ BCircle.x = stage.canvas.width; }
+                if (BCircle.y > stage.canvas.height) 	{ BCircle.y = 0; }
+                if (BCircle.y < 0) 						{ BCircle.y = stage.canvas.height; }
+				
+				// Tell EaselJS where to draw the line to
+				Bline.graphics.lineTo(BCircle.x, BCircle.y);
             }
 			
 			// output.text = "getPaused()    = "+createjs.Ticker.getPaused()+"\n"+
@@ -182,7 +203,7 @@
 </head>
 <body onload="init();">
 	<input type="button" value="pause" id="pauseBtn" onclick="togglePause();"><br>
-	<canvas id="demoCanvas" width="1400" height="800">
+	<canvas id="demoCanvas" width="1200" height="600">
 		alternate content
 	</canvas>
 </body>
